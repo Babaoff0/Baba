@@ -3,20 +3,53 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
--- Créer un Frame pour contenir les boutons
-local frame = Instance.new("Frame")
-frame.Parent = screenGui
-frame.Size = UDim2.new(0, 350, 0, 400)
-frame.Position = UDim2.new(0.5, -175, 0.5, -200)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
-frame.Visible = true
+-- Créer un Frame principal pour contenir les boutons
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = screenGui
+mainFrame.Size = UDim2.new(0, 400, 0, 500)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -250)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Visible = true
+
+-- Ajouter un effet de bordure arrondie
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
+
+-- Ajouter une ombre portée
+local shadow = Instance.new("ImageLabel")
+shadow.Parent = mainFrame
+shadow.Size = UDim2.new(1, 10, 1, 10)
+shadow.Position = UDim2.new(0, -5, 0, -5)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://5234388158" -- ID d'une texture d'ombre
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+
+-- Créer un titre pour le GUI
+local title = Instance.new("TextLabel")
+title.Parent = mainFrame
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "BabaGoat GUI"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.BorderSizePixel = 0
+
+-- Ajouter une bordure arrondie au titre
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = title
 
 -- Fonction pour styliser les boutons
 local function createButton(text, position, parent)
     local button = Instance.new("TextButton")
     button.Parent = parent
-    button.Size = UDim2.new(0, 300, 0, 50)
+    button.Size = UDim2.new(0, 350, 0, 50)
     button.Position = position
     button.Text = text
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -24,15 +57,30 @@ local function createButton(text, position, parent)
     button.Font = Enum.Font.GothamBold
     button.TextSize = 18
     button.BorderSizePixel = 0
+
+    -- Ajouter une bordure arrondie au bouton
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 8)
+    buttonCorner.Parent = button
+
+    -- Ajouter un effet de survol
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end)
+
     return button
 end
 
 -- Création des boutons
-local autoCoinButton = createButton("Activate Auto Coin", UDim2.new(0, 25, 0, 20), frame)
-local autoDummyButton = createButton("Activate Auto Dummy 5k", UDim2.new(0, 25, 0, 80), frame)
-local hitboxButton = createButton("Show/Hide Hitboxes", UDim2.new(0, 25, 0, 140), frame)
-local spamWeaponButton = createButton("Activate Spam Weapon", UDim2.new(0, 25, 0, 200), frame)
-local farmKillButton = createButton("Activate Farm Kill", UDim2.new(0, 25, 0, 260), frame)
+local autoCoinButton = createButton("Activate Auto Coin", UDim2.new(0, 25, 0, 70), mainFrame)
+local autoDummyButton = createButton("Activate Auto Dummy 5k", UDim2.new(0, 25, 0, 130), mainFrame)
+local hitboxButton = createButton("Show/Hide Hitboxes", UDim2.new(0, 25, 0, 190), mainFrame)
+local spamWeaponButton = createButton("Activate Spam Weapon", UDim2.new(0, 25, 0, 250), mainFrame)
+local farmKillButton = createButton("Activate Farm Kill", UDim2.new(0, 25, 0, 310), mainFrame)
+local closeButton = createButton("Close GUI", UDim2.new(0, 25, 0, 370), mainFrame)
 
 -- Fonction pour activer/désactiver un bouton
 local function toggleButton(button, state, scriptName)
@@ -58,7 +106,7 @@ autoCoinButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- **Auto Dummy 5k Level Script**
+-- **Auto Dummy 5k Script**
 local autoDummyActive = false
 local function startAutoDummy()
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -225,16 +273,7 @@ farmKillButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- **Ajout du bouton pour Open/Close le menu**
-local openGUIButton = createButton("Open GUI", UDim2.new(0, 10, 0, 10), screenGui)
-openGUIButton.Size = UDim2.new(0, 120, 0, 40)
-openGUIButton.Visible = false
-
-local function toggleGUI()
-    frame.Visible = not frame.Visible
-    openGUIButton.Visible = not frame.Visible
-end
-
-local toggleGUIButton = createButton("Close GUI", UDim2.new(0, 25, 0, 320), frame)
-toggleGUIButton.MouseButton1Click:Connect(toggleGUI)
-openGUIButton.MouseButton1Click:Connect(toggleGUI)
+-- **Fermer le GUI**
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
