@@ -1,0 +1,314 @@
+-- Créer le ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+-- Créer un Frame pour contenir les boutons
+local frame = Instance.new("Frame")
+frame.Parent = screenGui
+frame.Size = UDim2.new(0, 350, 0, 400)
+frame.Position = UDim2.new(0.5, -175, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Visible = true
+
+-- Fonction pour styliser les boutons
+local function createButton(text, position, parent)
+    local button = Instance.new("TextButton")
+    button.Parent = parent
+    button.Size = UDim2.new(0, 300, 0, 50)
+    button.Position = position
+    button.Text = text
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 18
+    button.BorderSizePixel = 0
+    return button
+end
+
+-- Création des boutons
+local autoCoinButton = createButton("Activate Auto Coin", UDim2.new(0, 25, 0, 20), frame)
+local autoDummyButton = createButton("Activate Auto Dummy 5k", UDim2.new(0, 25, 0, 80), frame)
+local hitboxButton = createButton("Show/Hide Hitboxes", UDim2.new(0, 25, 0, 140), frame)
+local spamWeaponButton = createButton("Activate Spam Weapon", UDim2.new(0, 25, 0, 200), frame)
+local farmKillButton = createButton("Activate Farm Kill", UDim2.new(0, 25, 0, 260), frame)
+
+-- Fonction pour activer/désactiver un bouton
+local function toggleButton(button, state, scriptName)
+    if state then
+        button.Text = "Deactivate " .. scriptName
+    else
+        button.Text = "Activate " .. scriptName
+    end
+end
+
+-- **Auto Coin Script**
+local autoCollect = true 
+local function collectCoins()
+    while autoCollect do
+        game:GetService("ReplicatedStorage").Events.CoinEvent:FireServer()
+        task.wait(0.1) -- Temps ajustable pour éviter le spam
+    end
+end
+spawn(collectCoins)
+
+-- **Auto Dummy 5k Level Script**
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FireballEvent = ReplicatedStorage:WaitForChild("SkillsInRS"):WaitForChild("RemoteEvent")
+local HitEvent = ReplicatedStorage:WaitForChild("jdskhfsIIIllliiIIIdchgdIiIIIlIlIli")
+local fireballPosition = Vector3.new(-83.33870697021484, 595.9384765625, 812.44775390625)
+local projectileType = "NewFireball"
+local dummyHumanoid = workspace:FindFirstChild("MAP"):FindFirstChild("5k_dummies").Dummy2:FindFirstChild("Humanoid")
+
+local fireballCooldown = 2
+local hitCooldown = 0.1
+
+task.spawn(function()
+    while true do
+        FireballEvent:FireServer(fireballPosition, projectileType)
+        task.wait(fireballCooldown)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        HitEvent:FireServer(dummyHumanoid, 1)
+        task.wait(hitCooldown)
+    end
+end)
+
+-- **Hitbox Script**
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local localPlayer = Players.LocalPlayer
+local DamageEvent = ReplicatedStorage:WaitForChild("SkillsInRS"):WaitForChild("DamageIndicatorEvent")
+
+local hitboxes = {}  
+local hitboxSize = Vector3.new(5, 5, 5)  
+local guiEnabled = true
+
+local screenGuiHitbox = Instance.new("ScreenGui")
+screenGuiHitbox.Parent = localPlayer:WaitForChild("PlayerGui")
+screenGuiHitbox.ResetOnSpawn = false
+
+local frameHitbox = Instance.new("Frame")
+frameHitbox.Size = UDim2.new(0, 250, 0, 150)
+frameHitbox.Position = UDim2.new(0.05, 0, 0.2, 0)
+frameHitbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frameHitbox.BorderSizePixel = 0
+frameHitbox.Visible = guiEnabled
+frameHitbox.Parent = screenGuiHitbox
+
+local slider = Instance.new("Frame")
+slider.Size = UDim2.new(1, -20, 0, 10)
+slider.Position = UDim2.new(0, 10, 0, 50)
+slider.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+slider.BorderSizePixel = 0
+slider.Parent = frameHitbox
+
+local knob = Instance.new("Frame")
+knob.Size = UDim2.new(0, 20, 0, 20)
+knob.Position = UDim2.new(0.5, -10, 0, -5)
+knob.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+knob.BorderSizePixel = 0
+knob.Parent = slider
+
+local toggleHitboxButton = Instance.new("TextButton")
+toggleHitboxButton.Size = UDim2.new(1, -20, 0, 30)
+toggleHitboxButton.Position = UDim2.new(0, 10, 0, 90)
+toggleHitboxButton.Text = "Close Hitbox GUI"
+toggleHitboxButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+toggleHitboxButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleHitboxButton.Parent = frameHitbox
+
+local function createHitbox(player)
+    if not player or not player.Character then return end
+    if player == localPlayer then return end  
+
+    local character = player.Character
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+
+    if not rootPart then return end
+
+    if hitboxes[player] then
+        hitboxes[player]:Destroy()
+    end
+
+    local hitbox = Instance.new("Part")
+    hitbox.Size = hitboxSize
+    hitbox.Transparency = 0.5
+    hitbox.Color = Color3.fromRGB(255, 0, 0)
+    hitbox.Material = Enum.Material.ForceField
+    hitbox.Anchored = true
+    hitbox.CanCollide = false
+    hitbox.Parent = game.Workspace
+    hitbox.Name = "Hitbox"
+
+    hitboxes[player] = hitbox
+end
+
+RunService.Heartbeat:Connect(function()
+    for player, hitbox in pairs(hitboxes) do
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = player.Character.HumanoidRootPart
+            hitbox.Position = rootPart.Position
+        end
+    end
+end)
+
+local dragging = false
+
+knob.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local relativeX = math.clamp(input.Position.X - slider.AbsolutePosition.X, 0, slider.AbsoluteSize.X)
+        knob.Position = UDim2.new(0, relativeX - knob.Size.X.Offset / 2, 0, -5)
+
+        local newScale = 2 + (relativeX / slider.AbsoluteSize.X) * 10
+        hitboxSize = Vector3.new(newScale, newScale + 2, newScale)
+
+        for _, hitbox in pairs(hitboxes) do
+            hitbox.Size = hitboxSize
+        end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+toggleHitboxButton.MouseButton1Click:Connect(function()
+    guiEnabled = not guiEnabled
+    frameHitbox.Visible = guiEnabled
+    toggleHitboxButton.Text = guiEnabled and "Close Hitbox GUI" or "Open Hitbox GUI"
+end)
+
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= localPlayer and player.Character then
+        createHitbox(player)
+    end
+    player.CharacterAdded:Connect(function()
+        createHitbox(player)
+    end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player ~= localPlayer then
+        player.CharacterAdded:Connect(function()
+            createHitbox(player)
+        end)
+    end
+end)
+
+-- **Spam Weapon Script**
+local event = game:GetService("ReplicatedStorage").Events.WeaponEvent
+local unequipArgs1 = { [1] = "None" }
+local unequipArgs2 = { [1] = "S0" }
+
+local function hideWeaponMenu()
+    local player = game:GetService("Players").LocalPlayer
+    if player and player:FindFirstChild("PlayerGui") then
+        for _, gui in pairs(player.PlayerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Name:lower():find("weapon") then
+                gui.Enabled = false
+            end
+        end
+    end
+end
+
+while true do
+    for i = 1, 9 do 
+        local args = { [1] = "S" .. i }
+
+        hideWeaponMenu()
+        event:FireServer(unpack(args))
+        task.wait(0.15)
+
+        event:FireServer(unpack(unequipArgs1))
+        task.wait(0.1)
+        event:FireServer(unpack(unequipArgs2))
+        task.wait(0.1)
+
+        hideWeaponMenu()
+    end
+end
+
+-- **Farm Kill Script**
+local farmKillActive = false
+farmKillButton.MouseButton1Click:Connect(function()
+    farmKillActive = not farmKillActive
+    toggleButton(farmKillButton, farmKillActive, "Farm Kill")
+    if farmKillActive then
+        spawn(function()
+            while farmKillActive do
+                local player = game:GetService("Players").LocalPlayer
+                local replicatedStorage = game:GetService("ReplicatedStorage")
+                local character, humanoid
+                local function teleportToDummies()
+                    character = player.Character or player.CharacterAdded:Wait()
+                    if character then
+                        local dummiesFolder = workspace:FindFirstChild("MAP") and workspace.MAP:FindFirstChild("5k_dummies")
+                        if dummiesFolder then
+                            local targetDummy = dummiesFolder:FindFirstChild("Dummy2")
+                            if targetDummy and targetDummy:FindFirstChild("HumanoidRootPart") then
+                                character:MoveTo(targetDummy.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
+                                return true
+                            end
+                        end
+                    end
+                    return false
+                end
+
+                local function autoKill()
+                    character = player.Character
+                    humanoid = character and character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        local success = teleportToDummies()
+                        if success then
+                            task.wait(1)
+                            local hitArgs = {
+                                [1] = humanoid,
+                                [2] = 1
+                            }
+                            replicatedStorage.jdskhfsIIIllliiIIIdchgdIiIIIlIlIli:FireServer(unpack(hitArgs))
+                            task.wait(0.3)
+                            humanoid.Health = 0
+                            local killArgs = {
+                                [1] = humanoid,
+                                [2] = 40206
+                            }
+                            replicatedStorage.SkillsInRS.DamageIndicatorEvent:FireServer(unpack(killArgs))
+                        end
+                    end
+                end
+                player.CharacterAdded:Connect(function()
+                    task.wait(0.5)
+                    autoKill()
+                end)
+                player.CharacterRemoving:Connect(function()
+                    task.wait(0.1)
+                    player:LoadCharacter()
+                end)
+                autoKill()
+            end
+        end)
+    end
+end)
+
+-- Fonction pour ouvrir et fermer le GUI
+local toggleGUIButton = createButton("Open GUI", UDim2.new(0, 25, 0, 320), frame)
+toggleGUIButton.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+    toggleGUIButton.Text = frame.Visible and "Close GUI" or "Open GUI"
+end)
