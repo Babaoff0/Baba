@@ -1,9 +1,9 @@
--- 🟢 Créer le ScreenGui
+-- Créer le ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
--- 🟢 Créer un Frame pour contenir les boutons
+-- Créer un Frame pour contenir les boutons
 local frame = Instance.new("Frame")
 frame.Parent = screenGui
 frame.Size = UDim2.new(0, 350, 0, 400)
@@ -12,7 +12,7 @@ frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
 frame.Visible = true
 
--- 🟢 Fonction pour styliser les boutons
+-- Fonction pour styliser les boutons
 local function createButton(text, position, parent)
     local button = Instance.new("TextButton")
     button.Parent = parent
@@ -27,14 +27,14 @@ local function createButton(text, position, parent)
     return button
 end
 
--- 🟢 Création des boutons
+-- Création des boutons
 local autoCoinButton = createButton("Activate Auto Coin", UDim2.new(0, 25, 0, 20), frame)
 local autoDummyButton = createButton("Activate Auto Dummy 5k", UDim2.new(0, 25, 0, 80), frame)
 local hitboxButton = createButton("Show/Hide Hitboxes", UDim2.new(0, 25, 0, 140), frame)
 local spamWeaponButton = createButton("Activate Spam Weapon", UDim2.new(0, 25, 0, 200), frame)
 local farmKillButton = createButton("Activate Farm Kill", UDim2.new(0, 25, 0, 260), frame)
 
--- 🟢 Fonction pour activer/désactiver un bouton
+-- Fonction pour activer/désactiver un bouton
 local function toggleButton(button, state, scriptName)
     if state then
         button.Text = "Deactivate " .. scriptName
@@ -43,7 +43,7 @@ local function toggleButton(button, state, scriptName)
     end
 end
 
--- ✅ Auto Coin Script (activable avec bouton)
+-- **Auto Coin Script**
 local autoCollect = false
 autoCoinButton.MouseButton1Click:Connect(function()
     autoCollect = not autoCollect
@@ -58,65 +58,104 @@ autoCoinButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ✅ Auto Dummy 5k Level Script (activable avec bouton)
-local autoDummyActive = false
-autoDummyButton.MouseButton1Click:Connect(function()
-    autoDummyActive = not autoDummyActive
-    toggleButton(autoDummyButton, autoDummyActive, "Auto Dummy 5k")
-    if autoDummyActive then
-        spawn(function()
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local FireballEvent = ReplicatedStorage:WaitForChild("SkillsInRS"):WaitForChild("RemoteEvent")
-            local HitEvent = ReplicatedStorage:WaitForChild("jdskhfsIIIllliiIIIdchgdIiIIIlIlIli")
-            local fireballPosition = Vector3.new(-83.338, 595.938, 812.447)
-            local dummyHumanoid = workspace:FindFirstChild("MAP"):FindFirstChild("5k_dummies").Dummy2:FindFirstChild("Humanoid")
-            while autoDummyActive do
-                FireballEvent:FireServer(fireballPosition, "NewFireball")
-                HitEvent:FireServer(dummyHumanoid, 1)
-                task.wait(2)
-            end
-        end)
+-- **Auto Dummy 5k Level Script** (remplacé par ton script)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- RemoteEvent pour tirer la fireball
+local FireballEvent = ReplicatedStorage:WaitForChild("SkillsInRS"):WaitForChild("RemoteEvent")
+
+-- RemoteEvent pour hit le dummy
+local HitEvent = ReplicatedStorage:WaitForChild("jdskhfsIIIllliiIIIdchgdIiIIIlIlIli")
+
+-- Coordonnées du tir (modifiable pour suivre un ennemi)
+local fireballPosition = Vector3.new(-83.33870697021484, 595.9384765625, 812.44775390625)
+local projectileType = "NewFireball"
+
+-- Cible du hit (assure-toi que ce chemin est valide)
+local dummyHumanoid = workspace:FindFirstChild("MAP"):FindFirstChild("5k_dummies").Dummy2:FindFirstChild("Humanoid")
+
+-- Délais
+local fireballCooldown = 2 -- Temps entre chaque tir
+local hitCooldown = 0.1 -- Temps entre chaque hit
+
+-- Fonction pour tirer les fireballs en boucle
+task.spawn(function()
+    while true do
+        local fireballArgs = {
+            [1] = fireballPosition,
+            [2] = projectileType
+        }
+        FireballEvent:FireServer(unpack(fireballArgs))
+        task.wait(fireballCooldown)
     end
 end)
 
--- ✅ Hitbox Toggle (activable avec bouton)
+-- Fonction pour spammer les hits sur le dummy
+task.spawn(function()
+    while true do
+        local hitArgs = {
+            [1] = dummyHumanoid,
+            [2] = 1 -- Dégâts ou autre paramètre
+        }
+        HitEvent:FireServer(unpack(hitArgs))
+        task.wait(hitCooldown)
+    end
+end)
+
+-- **Hitbox Script**
 local hitboxActive = false
 hitboxButton.MouseButton1Click:Connect(function()
     hitboxActive = not hitboxActive
     toggleButton(hitboxButton, hitboxActive, "Hitbox")
     if hitboxActive then
-        print("Hitboxes activated") -- Remplace par ton script de hitbox
+        -- Afficher les hitboxes (ajouter la logique pour afficher les hitboxes ici)
+        print("Hitboxes activated")
     else
+        -- Masquer les hitboxes
         print("Hitboxes deactivated")
     end
 end)
 
--- ✅ Spam Weapon (activable avec bouton)
-local spamWeaponActive = false
-spamWeaponButton.MouseButton1Click:Connect(function()
-    spamWeaponActive = not spamWeaponActive
-    toggleButton(spamWeaponButton, spamWeaponActive, "Spam Weapon")
-    if spamWeaponActive then
-        spawn(function()
-            local event = game:GetService("ReplicatedStorage").Events.WeaponEvent
-            local unequipArgs1 = { [1] = "None" }
-            local unequipArgs2 = { [1] = "S0" }
-            while spamWeaponActive do
-                for i = 1, 9 do
-                    local args = { [1] = "S" .. i }
-                    event:FireServer(unpack(args))
-                    task.wait(0.15)
-                    event:FireServer(unpack(unequipArgs1))
-                    task.wait(0.1)
-                    event:FireServer(unpack(unequipArgs2))
-                    task.wait(0.1)
-                end
-            end
-        end)
-    end
-end)
+-- **Spam Weapon Script** (remplacé par ton script)
+local event = game:GetService("ReplicatedStorage").Events.WeaponEvent
+local unequipArgs1 = { [1] = "None" }
+local unequipArgs2 = { [1] = "S0" }
 
--- ✅ Farm Kill (activable avec bouton)
+-- Fonction pour cacher le menu des armes
+local function hideWeaponMenu()
+    local player = game:GetService("Players").LocalPlayer
+    if player and player:FindFirstChild("PlayerGui") then
+        for _, gui in pairs(player.PlayerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Name:lower():find("weapon") then
+                gui.Enabled = false
+            end
+        end
+    end
+end
+
+while true do
+    for i = 1, 9 do -- Seulement de S1 à S9
+        local args = { [1] = "S" .. i }
+
+        -- Cache le menu avant chaque action
+        hideWeaponMenu()
+
+        -- Équipe l'arme
+        event:FireServer(unpack(args))
+        task.wait(0.15) -- Délai rapide
+
+        -- Déséquipe l'arme avec les deux méthodes
+        event:FireServer(unpack(unequipArgs1))
+        task.wait(0.1) -- Encore plus rapide
+        event:FireServer(unpack(unequipArgs2))
+        task.wait(0.1)
+
+        -- Cache à nouveau le menu pour éviter qu'il réapparaisse
+        hideWeaponMenu()
+    end
+end
+
+-- **Farm Kill Script** (remplacé par ton script)
 local farmKillActive = false
 farmKillButton.MouseButton1Click:Connect(function()
     farmKillActive = not farmKillActive
@@ -125,34 +164,90 @@ farmKillButton.MouseButton1Click:Connect(function()
         spawn(function()
             local player = game:GetService("Players").LocalPlayer
             local replicatedStorage = game:GetService("ReplicatedStorage")
+            local character, humanoid
+
+            -- Fonction pour téléporter le joueur aux 5k_dummies
             local function teleportToDummies()
-                local character = player.Character or player.CharacterAdded:Wait()
+                character = player.Character or player.CharacterAdded:Wait()
+
                 if character then
-                    local dummiesFolder = workspace:FindFirstChild("MAP"):FindFirstChild("5k_dummies")
+                    local dummiesFolder = workspace:FindFirstChild("MAP") and workspace.MAP:FindFirstChild("5k_dummies")
                     if dummiesFolder then
-                        local targetDummy = dummiesFolder:FindFirstChild("Dummy2")
+                        local targetDummy = dummiesFolder:FindFirstChild("Dummy2") -- Modifier si besoin
+
                         if targetDummy and targetDummy:FindFirstChild("HumanoidRootPart") then
-                            character:MoveTo(targetDummy.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
-                            return true
+                            -- Téléportation au dummy
+                            character:MoveTo(targetDummy.HumanoidRootPart.Position + Vector3.new(0, 3, 0)) -- +3 pour éviter les collisions
+                            return true -- Retourne vrai si la téléportation a réussi
                         end
                     end
                 end
-                return false
+                return false -- Retourne faux si la téléportation a échoué
             end
-            while farmKillActive do
-                if teleportToDummies() then
-                    task.wait(1)
-                    replicatedStorage.jdskhfsIIIllliiIIIdchgdIiIIIlIlIli:FireServer(player.Character.Humanoid, 1)
-                    task.wait(0.3)
-                    player.Character.Humanoid.Health = 0
-                    replicatedStorage.SkillsInRS.DamageIndicatorEvent:FireServer(player.Character.Humanoid, 40206)
+
+            -- Fonction pour appliquer le hit et tuer instantanément le joueur
+            local function autoKill()
+                character = player.Character
+                humanoid = character and character:FindFirstChild("Humanoid")
+
+                if humanoid then
+                    -- Téléporter et s'assurer que la téléportation est bien faite
+                    local success = teleportToDummies()
+
+                    if success then
+                        -- Attendre un court instant pour être sûr que le joueur est bien sur la position
+                        task.wait(1) 
+
+                        -- Ajouter 1 hit sur soi-même
+                        local hitArgs = {
+                            [1] = humanoid,
+                            [2] = 1
+                        }
+                        replicatedStorage.jdskhfsIIIllliiIIIdchgdIiIIIlIlIli:FireServer(unpack(hitArgs))
+
+                        -- Attendre un petit instant pour que le hit soit bien enregistré
+                        task.wait(0.3)
+
+                        -- Tue instantanément le joueur
+                        humanoid.Health = 0
+
+                        -- Envoyer le Remote Event pour comptabiliser le kill
+                        local killArgs = {
+                            [1] = humanoid,
+                            [2] = 40206 -- Score du kill
+                        }
+                        replicatedStorage.SkillsInRS.DamageIndicatorEvent:FireServer(unpack(killArgs))
+                    end
                 end
             end
+
+            -- Forçage du respawn immédiat
+            local function forceRespawn()
+                if player then
+                    task.wait(0.1) -- Court délai pour éviter des erreurs de chargement
+                    player:LoadCharacter() -- Respawn instantanément
+                end
+            end
+
+            -- Exécuter l'auto-kill après la téléportation complète
+            player.CharacterAdded:Connect(function()
+                task.wait(0.5) -- Laisser le temps au personnage de charger
+                autoKill() -- Exécuter immédiatement l'auto-kill après le spawn
+            end)
+
+            -- Détecter la mort et forcer le respawn immédiat
+            player.CharacterRemoving:Connect(function()
+                task.wait(0.1) -- Petit délai pour éviter les erreurs
+                forceRespawn() -- Forcer le respawn
+            end)
+
+            -- Lancer immédiatement au début
+            autoKill()
         end)
     end
 end)
 
--- ✅ Ajout du bouton pour **fermer et rouvrir le menu**
+-- **Ajout du bouton pour Open/Close le menu**
 local openGUIButton = createButton("Open GUI", UDim2.new(0, 10, 0, 10), screenGui)
 openGUIButton.Size = UDim2.new(0, 120, 0, 40)
 openGUIButton.Visible = false -- Masqué au début
