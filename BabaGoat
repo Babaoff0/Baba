@@ -275,5 +275,35 @@ end)
 
 -- **Fermer le GUI**
 closeButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
+    mainFrame.Visible = false
+end)
+
+-- Créer un bouton pour ouvrir le menu
+local openButton = Instance.new("TextButton")
+openButton.Parent = screenGui
+openButton.Size = UDim2.new(0, 100, 0, 50)
+openButton.Position = UDim2.new(0, 10, 0, 10)
+openButton.Text = "Open Menu"
+openButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+openButton.Font = Enum.Font.GothamBold
+openButton.TextSize = 18
+openButton.BorderSizePixel = 0
+
+-- Ajouter une bordure arrondie au bouton
+local openButtonCorner = Instance.new("UICorner")
+openButtonCorner.CornerRadius = UDim.new(0, 8)
+openButtonCorner.Parent = openButton
+
+-- Ajouter un effet de survol
+openButton.MouseEnter:Connect(function()
+    openButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+end)
+openButton.MouseLeave:Connect(function()
+    openButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+end)
+
+-- Fonction pour ouvrir le menu
+openButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = true
 end)
